@@ -1,101 +1,187 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import Question from "@/components/Question"
+import ProgressIndicator from "@/components/ProgressIndicator"
+import StartScreen from "@/components/StartScreen"
+import EndScreen from "@/components/EndScreen"
+import Sidebar from "@/components/Sidebar"
+// import Timer from "@/components/Timer"
+
+// This would typically come from your backend after processing the PDF
+const mockQuestions = [
+  {
+    id: 1,
+    text: "What is the capital of France?",
+    options: ["London", "Berlin", "Paris", "Madrid"],
+    correctAnswer: "Paris",
+  },
+  {
+    id: 2,
+    text: "Which planet is known as the Red Planet?",
+    options: ["Mars", "Venus", "Jupiter", "Saturn"],
+    correctAnswer: "Mars",
+  },
+  {
+    id: 3,
+    text: "What is the largest mammal in the world?",
+    options: ["African Elephant", "Blue Whale", "Giraffe", "Hippopotamus"],
+    correctAnswer: "Blue Whale",
+  },
+  {
+    id: 4,
+    text: "Who painted the Mona Lisa?",
+    options: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Michelangelo"],
+    correctAnswer: "Leonardo da Vinci",
+  },
+  {
+    id: 5,
+    text: "What is the chemical symbol for gold?",
+    options: ["Au", "Ag", "Fe", "Cu"],
+    correctAnswer: "Au",
+  },
+]
+
+export default function ExamPage() {
+  const [examState, setExamState] = useState("start")
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [answers, setAnswers] = useState([])
+  const [reviewFlags, setReviewFlags] = useState([])
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60)
+  const [questions, setQuestions] = useState(mockQuestions)
+
+  // useEffect(() => {
+  //   if (examState === "in-progress") {
+  //     const timer = setInterval(() => {
+  //       setTimeRemaining((prev) => {
+  //         if (prev <= 0) {
+  //           clearInterval(timer)
+  //           setExamState("end")
+  //           return 0
+  //         }
+  //         return prev - 1
+  //       })
+  //     }, 1000)
+  //     return () => clearInterval(timer)
+  //   }
+  // }, [examState])
+
+  const handleStartExam = (examId) => {
+    // In a real application, you'd fetch the questions for this exam from your backend
+    // For now, we'll just use the mock questions
+    setQuestions(mockQuestions)
+    setAnswers(new Array(mockQuestions.length).fill(null))
+    setReviewFlags(new Array(mockQuestions.length).fill(false))
+    setExamState("in-progress")
+  }
+
+  const handleUpload = (file) => {
+    // In a real application, you'd send this file to your backend for processing
+    console.log("Uploading file:", file.name)
+  }
+
+  const handleAnswer = (answer) => {
+    const newAnswers = [...answers]
+    newAnswers[currentQuestionIndex] = answer
+    setAnswers(newAnswers)
+  }
+  const handleNextQuestion = () =>
+    currentQuestionIndex < questions.length - 1 && setCurrentQuestionIndex(currentQuestionIndex + 1)
+  const handlePrevQuestion = () => currentQuestionIndex > 0 && setCurrentQuestionIndex(currentQuestionIndex - 1)
+  const handleReviewFlag = () => {
+    const newReviewFlags = [...reviewFlags]
+    newReviewFlags[currentQuestionIndex] = !newReviewFlags[currentQuestionIndex]
+    setReviewFlags(newReviewFlags)
+  }
+  const handleFinishExam = () => setExamState("review")
+  const handleSubmitExam = () => setExamState("end")
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 flex">
+      <AnimatePresence mode="wait">
+        {examState === "start" && <StartScreen onStart={handleStartExam} onUpload={handleUpload} key="start-screen" />}
+        {(examState === "in-progress" || examState === "review") && (
+          <>
+            <Sidebar
+              questions={questions}
+              currentIndex={currentQuestionIndex}
+              setCurrentIndex={setCurrentQuestionIndex}
+              answers={answers}
+              reviewFlags={reviewFlags}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <motion.div
+              className="flex-grow p-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="max-w-4xl mx-auto">
+                <div className="flex justify-between items-center mb-6">
+                  <ProgressIndicator
+                    totalQuestions={questions.length}
+                    currentQuestion={currentQuestionIndex + 1}
+                    answeredQuestions={answers.filter((a) => a !== null).length}
+                  />
+                  {/* <Timer timeRemaining={timeRemaining} /> */}
+                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentQuestionIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Question
+                      question={questions[currentQuestionIndex]}
+                      onAnswer={handleAnswer}
+                      selectedAnswer={answers[currentQuestionIndex]}
+                      isReviewMode={examState === "review"}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+                <div className="flex justify-between mt-8">
+                  <button
+                    onClick={handlePrevQuestion}
+                    disabled={currentQuestionIndex === 0}
+                    className="px-6 py-2 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={handleReviewFlag}
+                    className={`px-6 py-2 ${
+                      reviewFlags[currentQuestionIndex]
+                        ? "bg-yellow-500 hover:bg-yellow-600"
+                        : "bg-gray-300 hover:bg-gray-400"
+                    } text-white rounded-full transition-colors duration-200`}
+                  >
+                    {reviewFlags[currentQuestionIndex] ? "Unmark for Review" : "Mark for Review"}
+                  </button>
+                  {currentQuestionIndex === questions.length - 1 ? (
+                    <button
+                      onClick={examState === "in-progress" ? handleFinishExam : handleSubmitExam}
+                      className="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors duration-200"
+                    >
+                      {examState === "in-progress" ? "Finish" : "Submit"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleNextQuestion}
+                      className="px-6 py-2 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 transition-colors duration-200"
+                    >
+                      Next
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+        {examState === "end" && <EndScreen questions={questions} answers={answers} key="end-screen" />}
+      </AnimatePresence>
     </div>
-  );
+  )
 }
+
