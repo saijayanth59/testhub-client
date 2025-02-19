@@ -6,7 +6,6 @@ import { Upload, FileText, AlertCircle, Loader } from "lucide-react"
 
 
 
-// This would typically come from your backend
 const mockExams= [
   { id: "1", name: "Math Exam.pdf", status: "completed", questionCount: 50, timeLimit: 60, lastUpdated: "2023-05-15" },
   {

@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import Question from "@/components/Question"
-import ProgressIndicator from "@/components/ProgressIndicator"
-import StartScreen from "@/components/StartScreen"
-import EndScreen from "@/components/EndScreen"
-import Sidebar from "@/components/Sidebar"
-// import Timer from "@/components/Timer"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Question from "@/components/Question";
+import ProgressIndicator from "@/components/ProgressIndicator";
+import StartScreen from "@/components/StartScreen";
+import EndScreen from "@/components/EndScreen";
+import Sidebar from "@/components/Sidebar";
+import Timer from "@/components/Timer";
+import HomeWrapper from "@/components/home/HomeWrapper";
 
-// This would typically come from your backend after processing the PDF
 const mockQuestions = [
   {
     id: 1,
@@ -32,7 +32,12 @@ const mockQuestions = [
   {
     id: 4,
     text: "Who painted the Mona Lisa?",
-    options: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Michelangelo"],
+    options: [
+      "Vincent van Gogh",
+      "Leonardo da Vinci",
+      "Pablo Picasso",
+      "Michelangelo",
+    ],
     correctAnswer: "Leonardo da Vinci",
   },
   {
@@ -41,66 +46,75 @@ const mockQuestions = [
     options: ["Au", "Ag", "Fe", "Cu"],
     correctAnswer: "Au",
   },
-]
+];
 
 export default function ExamPage() {
-  const [examState, setExamState] = useState("start")
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [answers, setAnswers] = useState([])
-  const [reviewFlags, setReviewFlags] = useState([])
-  const [timeRemaining, setTimeRemaining] = useState(30 * 60)
-  const [questions, setQuestions] = useState(mockQuestions)
+  const [examState, setExamState] = useState("start");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [reviewFlags, setReviewFlags] = useState([]);
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60);
+  const [questions, setQuestions] = useState(mockQuestions);
 
-  // useEffect(() => {
-  //   if (examState === "in-progress") {
-  //     const timer = setInterval(() => {
-  //       setTimeRemaining((prev) => {
-  //         if (prev <= 0) {
-  //           clearInterval(timer)
-  //           setExamState("end")
-  //           return 0
-  //         }
-  //         return prev - 1
-  //       })
-  //     }, 1000)
-  //     return () => clearInterval(timer)
-  //   }
-  // }, [examState])
+  useEffect(() => {
+    if (examState === "in-progress") {
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 0) {
+            clearInterval(timer);
+            setExamState("end");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [examState]);
 
   const handleStartExam = (examId) => {
-    // In a real application, you'd fetch the questions for this exam from your backend
-    // For now, we'll just use the mock questions
-    setQuestions(mockQuestions)
-    setAnswers(new Array(mockQuestions.length).fill(null))
-    setReviewFlags(new Array(mockQuestions.length).fill(false))
-    setExamState("in-progress")
-  }
+    setQuestions(mockQuestions);
+    setAnswers(new Array(mockQuestions.length).fill(null));
+    setReviewFlags(new Array(mockQuestions.length).fill(false));
+    setExamState("in-progress");
+  };
 
   const handleUpload = (file) => {
-    // In a real application, you'd send this file to your backend for processing
-    console.log("Uploading file:", file.name)
-  }
+    console.log("Uploading file:", file.name);
+  };
 
   const handleAnswer = (answer) => {
-    const newAnswers = [...answers]
-    newAnswers[currentQuestionIndex] = answer
-    setAnswers(newAnswers)
-  }
+    const newAnswers = [...answers];
+    newAnswers[currentQuestionIndex] = answer;
+    setAnswers(newAnswers);
+  };
   const handleNextQuestion = () =>
-    currentQuestionIndex < questions.length - 1 && setCurrentQuestionIndex(currentQuestionIndex + 1)
-  const handlePrevQuestion = () => currentQuestionIndex > 0 && setCurrentQuestionIndex(currentQuestionIndex - 1)
+    currentQuestionIndex < questions.length - 1 &&
+    setCurrentQuestionIndex(currentQuestionIndex + 1);
+  const handlePrevQuestion = () =>
+    currentQuestionIndex > 0 &&
+    setCurrentQuestionIndex(currentQuestionIndex - 1);
   const handleReviewFlag = () => {
-    const newReviewFlags = [...reviewFlags]
-    newReviewFlags[currentQuestionIndex] = !newReviewFlags[currentQuestionIndex]
-    setReviewFlags(newReviewFlags)
-  }
-  const handleFinishExam = () => setExamState("review")
-  const handleSubmitExam = () => setExamState("end")
+    const newReviewFlags = [...reviewFlags];
+    newReviewFlags[currentQuestionIndex] =
+      !newReviewFlags[currentQuestionIndex];
+    setReviewFlags(newReviewFlags);
+  };
+  const handleFinishExam = () => setExamState("review");
+  const handleSubmitExam = () => setExamState("end");
+
+  return <HomeWrapper />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 flex">
       <AnimatePresence mode="wait">
-        {examState === "start" && <StartScreen onStart={handleStartExam} onUpload={handleUpload} key="start-screen" />}
+        {examState === "start" && (
+          <StartScreen
+            onStart={handleStartExam}
+            onUpload={handleUpload}
+            key="start-screen"
+          />
+        )}
         {(examState === "in-progress" || examState === "review") && (
           <>
             <Sidebar
@@ -123,7 +137,7 @@ export default function ExamPage() {
                     currentQuestion={currentQuestionIndex + 1}
                     answeredQuestions={answers.filter((a) => a !== null).length}
                   />
-                  {/* <Timer timeRemaining={timeRemaining} /> */}
+                  <Timer timeRemaining={timeRemaining} />
                 </div>
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -157,11 +171,17 @@ export default function ExamPage() {
                         : "bg-gray-300 hover:bg-gray-400"
                     } text-white rounded-full transition-colors duration-200`}
                   >
-                    {reviewFlags[currentQuestionIndex] ? "Unmark for Review" : "Mark for Review"}
+                    {reviewFlags[currentQuestionIndex]
+                      ? "Unmark for Review"
+                      : "Mark for Review"}
                   </button>
                   {currentQuestionIndex === questions.length - 1 ? (
                     <button
-                      onClick={examState === "in-progress" ? handleFinishExam : handleSubmitExam}
+                      onClick={
+                        examState === "in-progress"
+                          ? handleFinishExam
+                          : handleSubmitExam
+                      }
                       className="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors duration-200"
                     >
                       {examState === "in-progress" ? "Finish" : "Submit"}
@@ -179,9 +199,10 @@ export default function ExamPage() {
             </motion.div>
           </>
         )}
-        {examState === "end" && <EndScreen questions={questions} answers={answers} key="end-screen" />}
+        {examState === "end" && (
+          <EndScreen questions={questions} answers={answers} key="end-screen" />
+        )}
       </AnimatePresence>
     </div>
-  )
+  );
 }
-
