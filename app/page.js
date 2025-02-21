@@ -9,6 +9,7 @@ import EndScreen from "@/components/EndScreen";
 import Sidebar from "@/components/Sidebar";
 import Timer from "@/components/Timer";
 import HomeWrapper from "@/components/home/HomeWrapper";
+import ExamScreen from "@/components/exam/ExamScreen";
 
 const mockQuestions = [
   {
@@ -102,6 +103,8 @@ export default function ExamPage() {
   };
   const handleFinishExam = () => setExamState("review");
   const handleSubmitExam = () => setExamState("end");
+
+  return <ExamScreen />;
 
   return <HomeWrapper />;
 
