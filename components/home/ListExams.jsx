@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AlertCircle, FileText, Loader } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const mockExams = [
   {
@@ -78,9 +79,11 @@ export default function ListExams() {
               <p>Last updated: {exam.lastUpdated}</p>
             </div>
             {exam.status === "completed" && (
-              <button className="w-full px-4 py-2 bg-indigo-500 text-white text-sm font-medium rounded-md hover:bg-indigo-600 transition-colors">
-                Start Exam
-              </button>
+              <Link href={"/exam/143"}>
+                <button className="w-full px-4 py-2 bg-indigo-500 text-white text-sm font-medium rounded-md hover:bg-indigo-600 transition-colors">
+                  Start Exam
+                </button>
+              </Link>
             )}
             {exam.status === "processing" && (
               <div className="flex items-center justify-center w-full px-4 py-2 bg-gray-100 text-gray-500 text-sm font-medium rounded-md">
